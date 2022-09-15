@@ -1,0 +1,103 @@
+// This function wiill go the right file location, loop through the objects and import the latest versions of the objects.
+FUNCTION getAssets
+
+SET setFilePath to "publish/assets/set"
+SET characterFilePath to "publish/assets/character"
+SET propFilePath to "publish/assets/prop"
+SET animationFilePath to "publish/assets/sequence/animation"
+
+INIT setObj
+INIT charObj
+INIT propObj
+INIT animObj
+
+OPEN setFilePath location
+SET objList to objects in file location
+FOR i in objList
+	IF i is model
+		IF i model version > setObj version
+		SET setOBJ to i
+	ENDIF
+ENDFOR
+
+OPEN characterFilePath location
+SET objList to objects in file location
+FOR i in objList
+	IF i is model
+		IF i model version > charObj version
+		SET charOBJ to i
+	ENDIF
+ENDFOR
+
+OPEN propFilePath location
+SET objList to objects in file location
+FOR i in objList
+	IF i is model
+		IF i model version > propObj version
+		SET propOBJ to i
+	ENDIF
+ENDFOR
+
+OPEN animationFilePath location
+SET objList to objects in file location
+FOR i in objList
+	IF i is model
+		IF i model version > animObj version
+		SET animOBJ to i
+	ENDIF
+ENDFOR
+
+IMPORT setObj
+IMPORT charObj
+IMPORT propObj
+IMPORT animObj
+
+// This function will go to the corresponding file location and loop through the objects to find the latest version number and then import that model.
+FUNCTION updateAssets
+
+SET setFilePath to "publish/assets/set"
+SET characterFilePath to "publish/assets/character"
+SET propFilePath to "publish/assets/prop"
+SET animationFilePath to "publish/assets/sequence/animation"
+
+SET setObj to setModelVersion
+SET charObj to charModelVersion
+SET propObj to propModelVersion
+SET animObj to animModelVersion
+
+OPEN setFilePath location
+SET objList to objects in file location
+FOR i in objList
+	IF i model version > setObj model version
+		SET setObj to i model
+	ENDIF
+ENDFOR
+
+OPEN characterFilePath location
+SET objList to objects in file location
+FOR i in objList
+	IF i model version > charObj model version
+		SET charObj to i model
+	ENDIF
+ENDFOR
+
+OPEN propFilePath location
+SET objList to objects in file location
+FOR i in objList
+	IF i model version > propObj model version
+		SET propObj to i model
+	ENDIF
+ENDFOR
+
+OPEN animationFilePath location
+SET objList to objects in file location
+FOR i in objList
+	IF i model version > animObj model version
+		SET animObj to i model
+	ENDIF
+ENDFOR
+
+IMPORT setObj
+IMPORT charObj
+IMPORT propObj
+IMPORT animObj
