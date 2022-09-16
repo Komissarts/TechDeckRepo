@@ -1,0 +1,132 @@
+import maya.cmds as cmds
+import os
+
+filePath = cmds.textField("fileDirectory", q=True, v=True)
+global objCategory
+global seqCategory
+
+def saveAssetButton():
+	obj = cmds.ls(selection = True)[0] #get selected object
+	if (objCategory == "setPiece"):
+		filePath = filePath + "/wip/assets/setPiece/" + obj
+		#export surface + model
+		surVer = len(os.listdir(filePath + "/surfacing/")) + 1
+
+		#check number of files in directory to determine version number
+		modelVer = len(os.listdir(filePath + "/model/")) + 1
+		objList = cmds.listRelatives(obj)
+		for i in objList:
+			if (cmds.objectType(i, isType='surface')): #check child is surface
+				cmds.file(filePath + obj + "_surface.v" + surVer + ".mb", type="mayaBinary", exportAsReference=True)
+			if (cmds.objectType(i, isType='model')): #check child is model
+				cmds.file(filePath + obj + "_model.v" + modelVer + ".mb", type="mayaBinary", exportAsReference=True)
+
+	if (objCategory == "Set"):
+		filePath = filePath + "/wip/assets/set/" + obj
+		#export model only
+		modelVer = len(os.listdir(filePath + "/model/")) + 1
+		objList = cmds.listRelatives(obj)
+		for i in objList:
+			if (cmds.objectType(i, isType='model')): #check child is model
+				cmds.file(filePath + obj + "/model.v" + modelVer + ".mb", type="mayaBinary", exportAsReference=True)
+
+	if (objCategory == "Props"):
+		filePath = filePath + "/wip/assets/props/" + obj
+		#export model + rig + surface
+		surVer = len(os.listdir(filePath + "/surfacing/")) + 1
+		rigVer = len(os.listdir(filePath + "/rig/")) + 1
+		modelVer = len(os.listdir(filePath + "/model/")) + 1
+		objList = cmds.listRelatives(obj)
+		for i in objList:
+			if (cmds.objectType(i, isType='surface')):
+				cmds.file(filePath + "/surfacing.v" + surVer + ".mb", type="mayaBinary", exportAsReference=True)
+			if (cmds.objectType(i, isType='rig')):
+				cmds.file(filePath + "/rig.v" + rigVer + ".mb", type="mayaBinary", exportAsReference=True)
+			if (cmds.objectType(i, isType='model')):
+				cmds.file(filePath + "/model.v" + modelVer + ".mb", type="mayaBinary", exportAsReference=True)
+	
+	if (objCategory == "Character"):
+		filePath = filePath + "/wip/assets/character/" + obj
+		#export model + rig + surface
+		surVer = len(os.listdir(filePath + obj + "/surfacing/")) + 1
+		rigVer = len(os.listdir(filePath + obj + "/rig/")) + 1
+		modelVer = len(os.listdir(filePath + obj + "/model/")) + 1
+		objList = cmds.listRelatives(obj)
+		for i in objList:
+			if (cmds.objectType(i, isType='surface')):
+				cmds.file(filePath + "/surfacing.v" + surVer + ".mb", type="mayaBinary", exportAsReference=True)
+			if (cmds.objectType(i, isType='rig')):
+				cmds.file(filePath + "/rig.v" + rigVer + ".mb", type="mayaBinary", exportAsReference=True)
+			if (cmds.objectType(i, isType='model')):
+				cmds.file(filePath + "/model.v" + modelVer + ".mb", type="mayaBinary", exportAsReference=True)
+
+def saveSeqButton():
+	seqNum = cmds.textField("seqTF", q=True, v=True) #get shot number from text field
+	shotNum = cmds.textField("shotNum", q=True, v=True) #get sequence number from text field
+	filePath = filePath + "/wip/seqeunce" + seqNum + "/" + shotNum
+	if (seqCategory == "Animation"):
+		animVer = len(os.listdir(filePath + '/animation/'))  + 1 #check how many files in folder to determine vers num
+		file.save(filePath + '/animation.v' + animVer + '.mb', type="mayaBinary", save=True)
+	if (seqCategory == "Lighting"):
+		lightVer = len(os.listdir(filePath + '/light/'))  + 1 #check how many files in folder to determine vers num
+		file.save(filePath + '/light.v' + lightVer + '.mb', type="mayaBinary", save=True)
+	if (seqCategory == "Layout"):
+		layoutVer = len(os.listdir(filePath + '/layout/'))  + 1 #check how many files in folder to determine vers num
+		file.save(filePath + '/layout.v' + lightVer + '.mb', type="mayaBinary", save=True)
+
+def SavePublishWindow():
+    
+    if cmds.window('SavePublishWindow', exists = True):
+        cmds.deleteUI('SavePublishWindow')
+    
+    cmds.window(width = 100)
+    cmds.window('SavePublishWindow', resizeToFitChildren = True)
+    
+    cmds.columnLayout(adjustableColumn = True)
+    
+    cmds.text(label = "Project File Directory:",  align = "left")
+    cmds.textField()
+    
+    cmds.separator(h = 10)
+    cmds.text(label = "Selected object's name", align = "center", font = "boldLabelFont")
+    cmds.text(label = "assetName", align = "center", font = "fixedWidthFont")
+    cmds.separator(h = 10)
+    
+    cmds.text(label = "Asset Department Selection")
+    cmds.button(label = "SetPiece", align = "center", enable = False)
+    cmds.button(label = "Set", align = "center")
+    cmds.button(label = "Props", align = "center")
+    cmds.button(label = "Character", align = "center")
+    
+    cmds.text(label = "Current Department Selected", align = "center")
+    cmds.text(label = "SetPiece", align = "center", font = "boldLabelFont")
+    
+    cmds.separator(h=10)
+    cmds.button(label = "Save", align = "center")
+    cmds.button(label = "Publish", align = "center")
+    
+    cmds.separator(h = 20)
+    
+    cmds.text("Sequence Number")
+    seqTF = cmds.textField()
+    cmds.text("Shot Number")
+    shotTF = cmds.textField()
+    
+    cmds.columnLayout(adjustableColumn=True)
+    cmds.text(label = "Sequence Department Selection")
+    cmds.button(label = "Animation", align = "center", enable = False)
+    cmds.button(label = "Layout", align = "center")
+    cmds.button(label = "Lighting", align = "center")
+    
+    cmds.text(label = "Current Department Selected", align = "center")
+    cmds.text(label = "Animation", align = "center", font = "boldLabelFont")
+    
+    cmds.separator(h=10)
+    cmds.button(label = "Save", align = "center")
+    cmds.button(label = "Publish", align = "center")
+    #cmds.rowColumnLayout(column = 2)
+    cmds.separator(h = 20)
+    cmds.text(label = "File save as assetName_model_v001.mb", align = "center")
+
+    cmds.showWindow('SavePublishWindow')
+SavePublishWindow()
