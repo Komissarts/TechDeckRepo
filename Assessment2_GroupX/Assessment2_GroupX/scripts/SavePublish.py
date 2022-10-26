@@ -251,20 +251,20 @@ def publishSequence():
     
     changeWarnMsg("File save as " + fileName)
     
-def changeAssetMode(item):
+def changeAssetMode(item): #WHEN ASSETMODE IN OPTIONMENU CHANGED
     global assetMode
     global assetCategoryOM
     global modelBtn, surfaceBtn, rigBtn, animBtn
     
     assetMode = item
-    
+    # REMOVE OPTIONS IN ASSETCATEGORY
     if cmds.menuItem(surfaceBtn, exists=True):
         cmds.deleteUI(surfaceBtn)
     if cmds.menuItem(rigBtn, exists=True):
         cmds.deleteUI(rigBtn)
     if cmds.menuItem(animBtn, exists=True):
         cmds.deleteUI(animBtn)
-    
+    #ADD OPTIONS BASED ON ASSETMODE
     if assetMode == "setPiece":
         surfaceBtn = cmds.menuItem(label = "surface", parent = assetCategoryOM)
     if assetMode == "prop":
@@ -290,8 +290,8 @@ def checkFolderExist():
     global objName, objMsg
     global assetMode
     
-    obj = cmds.textField(objName, query = True, text = True)
-    path = os.path.join(filePath, "scenes", "wip", "assets", assetMode, obj)
+    obj = cmds.textField(objName, query = True, text = True) #URL TEXTFIELD
+    path = os.path.join(filePath, "scenes", "wip", "assets", assetMode, obj) #CHECK OBJ ASSETMODE EXIST
 
     if os.path.exists(path):
         cmds.text(objMsg, label = "Folder Exist", edit = True)
@@ -330,7 +330,7 @@ def SavePublishWindow():
     assetCategory = "model"
     sequenceMode = "layout"
     
-    filePath = r"D:\Uni stuff\Tech Dir of 3D Anim\TechDeckRepo\Assessment2_GroupX\Assessment2_GroupX"
+    filePath = ""
     
     if cmds.window('SavePublishWindow', exists = True):
         cmds.deleteUI('SavePublishWindow')
