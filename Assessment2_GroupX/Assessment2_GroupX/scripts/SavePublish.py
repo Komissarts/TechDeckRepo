@@ -341,7 +341,7 @@ def SavePublishWindow():
     cmds.columnLayout(adjustableColumn = True)
     
     cmds.text(label = "Project File Directory:",  align = "left")
-    filePathTF = cmds.textField(text = r"D:\Uni stuff\Tech Dir of 3D Anim\TechDeckRepo\Assessment2_GroupX\Assessment2_GroupX")
+    filePathTF = cmds.textField()
     cmds.button(label = "Browse Folder", align = "center", command = "BrowseFolder()")
     
     cmds.separator(h = 10)
