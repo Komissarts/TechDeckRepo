@@ -128,27 +128,17 @@ def ImportLatestShaders():
             
             print(obj)
             for set in obj:
-                Obj_Material=[]
+                Obj_Material=[] #ADD A CHECK IF MODEL NAMES DO NOT MATCH
                 for i in set.split(':'):            
                     Obj_Material.append(i)
                 print("#1: " + Obj_Material[0] + " #2: " + Obj_Material[1])
                 ObjTransform = mc.ls("*:"+Obj_Material[0]+"*")[0]
-                print("Mesh: " + ObjTransform)
                 Material = mc.ls("*:"+Obj_Material[1]+"*")[0]
-                
-                
+                print("Mesh: " + ObjTransform)
                 print("Material: " + Material)
-                
-                #ObjMesh = mc.listRelatives(ObjTransform, shapes=True)[0]
-                ObjShadingEngine = mc.listConnections(ObjTransform, type="shadingEngine")[0]
-                ObjMat = mc.listConnections(ObjShadingEngine + ".surfaceShader")[0]
-                
                 mc.select(ObjTransform)
                 mc.hyperShade(assign=str(Material))
-                
-                #mc.replaceNode(ObjMat, Material)
-                #mc.setAttr(ObjMat, Material)
-                print(ObjMat)
+                mc.select(cl=True)
             
             infile.close()
             
