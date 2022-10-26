@@ -381,7 +381,7 @@ def SavePublishWindow():
     seqTF = cmds.textField(changeCommand = "checkFolderExistSeq()")
     cmds.text("Shot Number")
     shotTF = cmds.textField(changeCommand = "checkFolderExistSeq()")
-    if "_" in currentFileName:
+    if currentFileName.count("_") == 2:
         cmds.textField(seqTF, edit = True, text = re.search('(.+?)_', currentFileName).group(1))
         cmds.textField(shotTF, edit = True, text = re.search('_(.+?)_', currentFileName).group(1))
     seqMsg = cmds.text(label = "", align = "center")
