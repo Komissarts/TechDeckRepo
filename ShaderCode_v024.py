@@ -31,6 +31,12 @@ elif(isCurrentlyInLighting == True):
     #LightPUB_Dir = SceneDir.replace("model/source", "surfacing")
     print("Currently In A Lighting Scene")
 
+def GetFileVersion():
+    print("tse")
+
+
+
+
 
 #print("New ShaderPUB_Dir: "+ ShaderPUB_Dir)
 
@@ -157,20 +163,28 @@ def ApplyCustomShaders():
     
 
 def ReloadLighting():
-    
     #list of currently applied shaders
     #remove from list of all shaders
     #delete all shaders that are not currently applied
     
-    
+    AllShaders=[]
+    AssignedShaders=[]
+    UnassignedShaders=[]
     
     #¯\_(ツ)_/¯# Placeholder Function
     selected = mc.ls(mat=True)
-    mc.select(selected)
+    #mc.select(selected)
     for i in selected:
+        AllShaders.append(i)
+        AttachedObject = mc.hyperShade(o=str(i))
+        print(AttachedObject)
+        if(AttachedObject):
+            AssignedShaders.append(i)
         print(i)
-
-
+        mc.select(i)
+        mc.delete()
+    print(AssignedShaders)
+    print(AllShaders)
 
 
 
