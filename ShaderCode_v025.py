@@ -99,7 +99,6 @@ def ImportLatestShaders():
         print("Meshes Selected: " +str(SceneGeometryList)+ "Importing Shaders")
 
     for SceneGeometry in range(len(SceneGeometryList)):
-        print(SceneGeometryList[SceneGeometry])
         modelReferenceDir = mc.referenceQuery(SceneGeometryList[SceneGeometry], filename=True)
         ShaderPUB_Dir = modelReferenceDir.replace("model/source", "surfacing")
         ShaderPUB_DirArray=[]
@@ -123,7 +122,7 @@ def ImportLatestShaders():
         if(SelectedShaderVer > 0):
             ShaderVer = SelectedShaderVer
         
-        print("Shader Ver. Being Applied: " + str(ShaderVer))
+        
         
         LatestShaderMB_Dir = ShaderPUB_Dir + BaseSurfacingName + str(ShaderVer) +".mb"        #Shader Directory for most recent MayaBinary File
         LatestShaderJSON_Dir = ShaderPUB_Dir + BaseSurfacingName + str(ShaderVer) +".json"    #Shader Directory for most recent JSON File
@@ -131,7 +130,7 @@ def ImportLatestShaders():
         if(os.path.exists(LatestShaderMB_Dir) & os.path.exists(LatestShaderJSON_Dir)):
             if(LatestShaderMB_Dir not in PreviouslyVisitedDirectories):
                 print("Latest version File Directory: " + LatestShaderMB_Dir)
-                mc.file(LatestShaderMB_Dir, i=True, type="mayaBinary", ra=True, rdn=True, mnc=False, ns="V_"+str(ShaderVer), op="v=0", pr=True, an=True, itr="keep", mnr=True)
+                mc.file(LatestShaderMB_Dir, i=True, type="mayaBinary", ra=True, rdn=True, mnc=False, ns=FileNameArray[0], op="v=0", pr=True, an=True, itr="keep", mnr=True)
                 
                 PreviouslyVisitedDirectories.append(LatestShaderMB_Dir)
                 
@@ -146,48 +145,69 @@ def ImportLatestShaders():
                     for i in set.split(':'):            
                         Obj_Material.append(i)
                     ObjTransformList = mc.ls("*:"+Obj_Material[0]+"*")
-                    MaterialList = mc.ls("*:"+Obj_Material[1]+"*")
-                    if(ObjTransformList):
+                    MaterialList = mc.ls("*"+Obj_Material[0]+":"+Obj_Material[1]+"*")
+                    if(len(ObjTransformList) > 0 & len(MaterialList) > 0):
                         ObjTransform = ObjTransformList[0]
                         Material = MaterialList[0]
-                        print("Mesh: " + ObjTransform + " | Material: " + Material)
+                        print("Mesh: " + ObjTransform + " | Material: " + Material + " | Shader Ver. Being Applied: " + str(ShaderVer))
+                        
+                        #selectedMesh = mc.listRelatives(ObjTransform, shapes=True)[0]
+                        #print(selectedMesh)
+                        #selectedMeshShading = mc.listConnections(selectedMesh, type="shadingEngine")[0]
+                        #print(selectedMeshShading)
+                        #selectedMat = mc.listConnections(selectedMeshShading + ".surfaceShader")[0]
+                        #print(selectedMat)
+                        
                         mc.select(ObjTransform)
                         mc.hyperShade(assign=str(Material))
                         mc.select(cl=True)
                     else:
                         print("ERROR - Lighting Scene Model does not match published model, Expected: " + Obj_Material[0] + 
-                              " Recieved: " + SceneGeometryList[SceneGeometry].split('|')[1].split(':')[1] + " Please Update References")
+                              " | Recieved: " + SceneGeometryList[SceneGeometry] + " Please Update References")
                 
                 infile.close()
             
         else:
-            print("ERROR - Mesh Does Not Have Published Shaders")
+            print("ERROR - " + SceneGeometryList[SceneGeometry] + " Does Not Have Published Shader Version: " + str(ShaderVer))
 
 
 def ApplyCustomShaders():
     
-    mc.select(mc.ls(geometry=True))
+    selected=mc.select(mc.ls(geometry=True))
+    
+    
+    if(selected):
+        for i in selected:
+            selectedMesh = mc.listRelatives(selected[i], shapes=True)[0]
+            selectedMeshShading = mc.listConnections(selectedMesh, type="shadingEngine")[0]
+            selectedMat = mc.listConnections(selectedMeshShading + ".surfaceShader")[0]
+            mc.connectAttr(f="lambert.outColour")
+    
     mc.hyperShade(assign="lambert1")
     
     allmat=mc.ls(mat=True)
-    basemat=mc.ls("lambert1","particleCloud1","shaderGlow1","standardSurface1")
-    for b in basemat:
-        allmat.remove(b)
+    basemat=mc.ls("*lambert1*","*standardSurface1*")
+    
+    allmat.remove(basemat[0])
+    allmat.remove(basemat[1]) 
+    allmat.remove("particleCloud1") 
+    #for b in basemat:
+    #    allmat.remove(b)
     for mat in allmat:
         mc.delete(mat)
     
+    mc.select(cl=True)
+    #ShaderVer = mc.intField(ShaderVerInput, q = True, value = True)
+    #selected = mc.ls(selection = True)
     
-    ShaderVer = mc.intField(ShaderVerInput, q = True, value = True)
-    selected = mc.ls(selection = True)
-    
-    if(len(selected) == 0):
-        print("No Meshes Selected - Importing All Shaders")
-        selected = mc.ls("*Geo")
-        mc.select(selected)
-        print(selected)
-        for i in selected:
-            children = mc.listRelatives(i, shapes=True, children=True, fullPath=True)
-            print(children)
+    #if(len(selected) == 0):
+    #    print("No Meshes Selected - Importing All Shaders")
+    #    selected = mc.ls("*Geo")
+    #    mc.select(selected)
+    #    print(selected)
+    #    for i in selected:
+    #        children = mc.listRelatives(i, shapes=True, children=True, fullPath=True)
+    #        print(children)
         
         #parents = mc.ls(selected, long=True)[0].split('|')[1:-1]
         #mc.select(parents)
@@ -275,7 +295,7 @@ ShaderVerInput = mc.intField(width = 50, v=0, en = isCurrentlyInLighting)
 mc.separator(h=10)
 mc.separator(h=10)
 
-mc.button(label = ';-; reset all materials', command = 'ApplyCustomShaders()', en = isCurrentlyInLighting)
+mc.button(label = '!!!Reset All Shaders!!!', command = 'ApplyCustomShaders()', en = isCurrentlyInLighting)
 mc.button(label = 'Reload Shaders', command = 'ReloadLighting()', en = isCurrentlyInLighting)
 
 mc.separator(h=10)
