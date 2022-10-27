@@ -1,7 +1,8 @@
 import maya.cmds as mc
-import os.path
+import os
 import ntpath
 import json
+import posixpath
 
 #Gets Relative File path of model 
 SceneDir = str(mc.file(q=True, exn=True))
@@ -10,6 +11,9 @@ if(SceneDir.find("surfacing") != -1):
     isCurrentlyInLighting = False
 elif(SceneDir.find("light") != -1):
     isCurrentlyInLighting = True
+    
+if(os.name == 'nt'):
+    isRunningWindows = True
 
 
 if(isCurrentlyInLighting == False):
@@ -89,13 +93,13 @@ def PublishShaders():
 
 def ImportLatestShaders():
     selected = mc.ls(selection = True)
-    #mc.select(cl = True)
-    #selected = mc.ls(geometry=True)
-    #mc.select(selected)
     
+    #Checks if the user has selected any meshes
+    #if nothing has been selected, select all geometry objects and apply shaders
     if(len(selected) == 0):
         print("No Meshes Selected - Importing All Shaders")
         selected = mc.ls(geometry=True)
+        
         mc.select(selected)
         
     else:
@@ -114,7 +118,7 @@ def ImportLatestShaders():
         BaseSurfacingName = FileNameArray[0] + ".v"
         BaseSurfacingName = BaseSurfacingName.replace("model", "surface")
         ShaderPUB_DirArray.remove(ShaderPUB_DirArray[-1])
-        ShaderPUB_Dir = '/'.join(ShaderPUB_DirArray) + "/" 
+        ShaderPUB_Dir = '/'.join(ShaderPUB_DirArray) + "/"
         
         fileIncrementer = 1
         while os.path.exists(ShaderPUB_Dir + BaseSurfacingName + str(fileIncrementer) +".mb"):
@@ -125,7 +129,7 @@ def ImportLatestShaders():
         LatestShaderJSON_Dir = ShaderPUB_Dir + BaseSurfacingName + str(LatestVer) +".json"
         if(os.path.exists(LatestShaderMB_Dir) & os.path.exists(LatestShaderJSON_Dir)):
             print("Latest version File Directory: " + LatestShaderMB_Dir)
-            mc.file(LatestShaderMB_Dir, i=True, type="mayaBinary", ra=True, rdn=True, mnc=False, ns="test", op="v=0", pr=True, an=True, itr="keep", mnr=True)
+            mc.file(LatestShaderMB_Dir, i=True, type="mayaBinary", ra=True, rdn=True, mnc=False, ns="V_"+str(LatestVer), op="v=0", pr=True, an=True, itr="keep", mnr=True)
             
             with open(LatestShaderJSON_Dir, 'r') as infile:
                 data=infile.read()
@@ -134,10 +138,9 @@ def ImportLatestShaders():
             
             print(obj)
             for set in obj:
-                Obj_Material=[] #ADD A CHECK IF MODEL NAMES DO NOT MATCH
+                Obj_Material=[]
                 for i in set.split(':'):            
                     Obj_Material.append(i)
-                #print("#1: " + Obj_Material[0] + " #2: " + Obj_Material[1])
                 ObjTransformList = mc.ls("*:"+Obj_Material[0]+"*")
                 MaterialList = mc.ls("*:"+Obj_Material[1]+"*")
                 if(ObjTransformList):
@@ -157,9 +160,36 @@ def ImportLatestShaders():
 
 
 def ApplyCustomShaders():
-    ShaderVer = mc.intField(LightingVerInput, q = True, value = True)
+    ShaderVer = mc.intField(ShaderVerInput, q = True, value = True)
+    selected = mc.ls(selection = True)
     
-    print("ApplyLighting")
+    if(len(selected) == 0):
+        print("No Meshes Selected - Importing All Shaders")
+        selected = mc.ls("*Geo")
+        mc.select(selected)
+        print(selected)
+        for i in selected:
+            children = mc.listRelatives(i, shapes=True, children=True, fullPath=True)
+            print(children)
+        
+        #parents = mc.ls(selected, long=True)[0].split('|')[1:-1]
+        #mc.select(parents)
+        #print(parents)
+        #parents.reverse()
+        #parentGroup = parents[0]
+        
+        #print(parentGroup)
+        
+        #mc.select(parentGroup)
+    
+    #selected = mc.ls(selection = True)
+    #mc.select(mc.ls(con=True))
+    #parents = mc.ls(selected, long=True)[0].split('|')[1:-1]
+    #parents.reverse()
+    #parentGroup = parents[0]
+    #print(parents[0])
+    #print("ApplyLighting")
+    
     
 
 def ReloadLighting():
@@ -182,7 +212,7 @@ def ReloadLighting():
             AssignedShaders.append(i)
         print(i)
         mc.select(i)
-        mc.delete()
+        #mc.delete()
     print(AssignedShaders)
     print(AllShaders)
 
