@@ -5,6 +5,8 @@ import json
 import posixpath
 import mtoa
 
+#from pymel.all import mel
+
 #Gets Relative File path of model 
 SceneDir = str(mc.file(q=True, exn=True))
 
@@ -135,7 +137,6 @@ def ImportLatestShaders():
                 with open(LatestShaderJSON_Dir, 'r') as infile:
                     data=infile.read()
                 obj = json.loads(data)
-                #print(obj)
                 
                 mc.file(LatestShaderMB_Dir, i=True, type="mayaBinary", ra=True, rdn=True, mnc=False, ns="v_"+str(ShaderVer)+BaseSurfacingName, op="v=0", pr=True, an=True, itr="keep", mnr=True)
                 
@@ -144,7 +145,7 @@ def ImportLatestShaders():
                     for i in set.split(':'):            
                         Obj_Material.append(i)
                     ObjTransformList = mc.ls("*:"+Obj_Material[0]+"*")
-                    MaterialList = mc.ls("*v_"+str(ShaderVer)+BaseSurfacingName+":"+Obj_Material[1]+"*")
+                    MaterialList = mc.ls("*v_"+str(ShaderVer)+BaseSurfacingName+"*:"+Obj_Material[1]+"*")
                     if(ObjTransformList):
                         ObjTransform = ObjTransformList[0]
                         Material = MaterialList[0]
@@ -155,138 +156,67 @@ def ImportLatestShaders():
                     else:
                         print("ERROR - Lighting Scene Model does not match published model, Expected: " + Obj_Material[0] + 
                               " | Recieved: " + SceneGeometryList[SceneGeometry] + " Please Update References")
-                
                 infile.close()
-            
         else:
             print("ERROR - " + SceneGeometryList[SceneGeometry] + " Does Not Have Published Shader Version: " + str(ShaderVer))
 
 
 def RemoveUnused():
+    mel.eval('hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes");')
     
-    selected=mc.select(mc.ls(geometry=True))
-    if(selected):
-        for i in selected:
-            selectedMesh = mc.listRelatives(selected[i], shapes=True)[0]
-            selectedMeshShading = mc.listConnections(selectedMesh, type="shadingEngine")[0]
-            selectedMat = mc.listConnections(selectedMeshShading + ".surfaceShader")[0]
-            mc.connectAttr(f="lambert.outColour")
-    
-    mc.hyperShade(assign="lambert1")
-    
-    allmat=mc.ls(mat=True)
-    basemat=mc.ls("*lambert1*","*standardSurface1*")
-    
-    allmat.remove(basemat[0])
-    allmat.remove(basemat[1]) 
-    allmat.remove("particleCloud1") 
-    #for b in basemat:
-    #    allmat.remove(b)
-    for mat in allmat:
-        mc.delete(mat)
-    
-    mc.select(cl=True)
-    #ShaderVer = mc.intField(ShaderVerInput, q = True, value = True)
-    #selected = mc.ls(selection = True)
-    
-    #if(len(selected) == 0):
-    #    print("No Meshes Selected - Importing All Shaders")
-    #    selected = mc.ls("*Geo")
-    #    mc.select(selected)
-    #    print(selected)
-    #    for i in selected:
-    #        children = mc.listRelatives(i, shapes=True, children=True, fullPath=True)
-    #        print(children)
-        
-        #parents = mc.ls(selected, long=True)[0].split('|')[1:-1]
-        #mc.select(parents)
-        #print(parents)
-        #parents.reverse()
-        #parentGroup = parents[0]
-        
-        #print(parentGroup)
-        
-        #mc.select(parentGroup)
-    
-
     print("ApplyLighting")
     
     
-
+#Obsolete Removed Code to replace and update references in the scene
 def ReloadReferences():
-    
-    #selected = mc.ls('mRef_*')
     selected = mc.ls(selection = True)
-    #mc.select(mc.ls(con=True))
-    
     AllSceneGeometryList = mc.ls(geometry=True)
     SceneGeometryList = AllSceneGeometryList
-    
     for SceneGeometry in SceneGeometryList:
-
         if(mc.referenceQuery(SceneGeometry, isNodeReferenced=True)):
             print(SceneGeometry+"Is a reference")
-            print(mc.referenceQuery(SceneGeometry, f=True))
-            ModelReference_Dir = mc.referenceQuery(SceneGeometry, f=True)
             
-            ModelReference_DirArray=[]
-            for DirSplitFwdSlsh in ModelReference_Dir.split('/'):
-                ModelReference_DirArray.append(DirSplitFwdSlsh)
+            parents = mc.ls(SceneGeometry, long=True)[0].split('|')[1:-1]
+            print(parents)
+            selectedParent = mc.ls(parents[1])[0]
+            print(selectedParent)
+            if(mc.referenceQuery(selectedParent, isNodeReferenced=True)):
+                print(selectedParent+"is also a ref")
                 
-            FileNameArray=[]
-            for DirSplitPeriod in ModelReference_DirArray[-1].split('.'):
-                FileNameArray.append(DirSplitPeriod)
+                print(mc.referenceQuery(selectedParent, f=True))
+                ModelReference_Dir = mc.referenceQuery(selectedParent, f=True, p=True)
                 
-            if(FileNameArray[-1] == "mb"):
-                #print("ye")
-                BaseSurfacingName = FileNameArray[0]
+                ModelReference_DirArray=[]
+                for DirSplitFwdSlsh in ModelReference_Dir.split('/'):
+                    ModelReference_DirArray.append(DirSplitFwdSlsh)
+                    
+                FileNameArray=[]
+                for DirSplitPeriod in ModelReference_DirArray[-1].split('.'):
+                    FileNameArray.append(DirSplitPeriod)
+                    
+                if(FileNameArray[-1] == "mb"):
+                    BaseSurfacingName = FileNameArray[0]
+                    
+                    ModelReference_DirArray.remove(ModelReference_DirArray[-1])
+                    ModelReference_Dir = '/'.join(ModelReference_DirArray) + "/"                    
+                    fileIncrementer = 1
+                    while os.path.exists(ModelReference_Dir + BaseSurfacingName + ".v00"+ str(fileIncrementer) +".mb"):
+                        fileIncrementer += 1
+                    ShaderVer = fileIncrementer - 1
+                    
+                    LatestModelRef_Dir = ModelReference_Dir + BaseSurfacingName + ".v00"+ str(ShaderVer) +".mb"
+                    print(LatestModelRef_Dir)
+                    #mc.file(LatestModelRef_Dir, loadReference=SceneGeometry)
                 
-                #BaseSurfacingName = BaseSurfacingName.replace("model", "surface")
-                ModelReference_DirArray.remove(ModelReference_DirArray[-1])
-                ModelReference_Dir = '/'.join(ModelReference_DirArray) + "/"                    
-                fileIncrementer = 1
-                while os.path.exists(ModelReference_Dir + BaseSurfacingName + ".v00"+ str(fileIncrementer) +".mb"):
-                    fileIncrementer += 1
-                ShaderVer = fileIncrementer - 1
-                
-                LatestModelRef_Dir = ModelReference_Dir + BaseSurfacingName + ".v00"+ str(ShaderVer) +".mb"        #Shader Directory for most recent MayaBinary File
-                print(LatestModelRef_Dir)
-                mc.file(LatestModelRef_Dir, loadReference=SceneGeometry)
-            
-            else:
-                print("Reference Is NOT a MB File")
-            #print(FileNameArray)              
+                else:
+                    print("Reference Is NOT a MB File")
               
         else:
             print(SceneGeometry+"Is NOT a ref")
-        #modelReferenceDir = mc.referenceQuery(parentGroup, filename=True)
-        #print(modelReferenceDir)
-        
-    #list of currently applied shaders
-    #remove from list of all shaders
-    #delete all shaders that are not currently applied
-    
-    #select every object and re-apply the most recent 
-    
-    #AllShaders=[]
-    #AssignedShaders=[]
-    #UnassignedShaders=[]
-    
-    #¯\_(ツ)_/¯# Placeholder Function
-    #selected = mc.ls(mat=True)
-    #mc.select(selected)
-    #for i in selected:
-    #    AllShaders.append(i)
-    #    AttachedObject = mc.hyperShade(o=str(i))
-    #    print(AttachedObject)
-    #    if(AttachedObject):
-    #        AssignedShaders.append(i)
-    #    print(i)
-    #    mc.select(i)
-    #    #mc.delete()
-    #print(AssignedShaders)
-    #print(AllShaders)
 
+#Mel Eval
+#Hypershader
+#Node Editor
 
 
 
@@ -316,20 +246,17 @@ mc.separator(h=10)
 mc.text('Select Objects to Re-Apply Materials')
 mc.separator(h=10)
 mc.button(label = 'Apply Shaders', command = 'ImportLatestShaders()', en = isCurrentlyInLighting)
-mc.separator(h=30)
+mc.separator(h=10)
 
+mc.button(label = 'Remove Unused Shaders', command = 'RemoveUnused()', en = isCurrentlyInLighting)
+mc.separator(h=30)
 mc.text('Leave at 0 to Import Latest')
 mc.separator(h=10)
+
 mc.gridLayout(ch=20,cw=150, nrc=[3,2], autoGrow= True)
 
 mc.text('Enter Version Number:')
 ShaderVerInput = mc.intField(width = 50, v=0, en = isCurrentlyInLighting)
-
-mc.separator(h=10)
-mc.separator(h=10)
-
-mc.button(label = 'Remove Unused Shaders', command = 'RemoveUnused()', en = isCurrentlyInLighting)
-mc.button(label = 'Reload Referenced Assets', command = 'ReloadReferences()', en = isCurrentlyInLighting)
 
 mc.separator(h=10)
 mc.separator(h=10)
