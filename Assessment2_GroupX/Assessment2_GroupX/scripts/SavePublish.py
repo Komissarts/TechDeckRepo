@@ -330,7 +330,14 @@ def SavePublishWindow():
     assetCategory = "model"
     sequenceMode = "layout"
     
+    print(cmds.file(query = True, sceneName = True))
+    #CURRENT .mb FILE SAVE DIRECTORY
+    currentFilePath = cmds.file(query = True, sceneName = True)
+    
     filePath = ""
+    #CHECK CURRENTFILEPATH DIRECTORY INCLUDES 'scenes' FOLDER
+    if "scenes" in currentFilePath:
+        filePath = re.search("(.+?)/scenes", currentFilePath).group(1)
     
     if cmds.window('SavePublishWindow', exists = True):
         cmds.deleteUI('SavePublishWindow')
@@ -341,13 +348,13 @@ def SavePublishWindow():
     cmds.columnLayout(adjustableColumn = True)
     
     cmds.text(label = "Project File Directory:",  align = "left")
-    filePathTF = cmds.textField()
+    filePathTF = cmds.textField(text = filePath)
     cmds.button(label = "Browse Folder", align = "center", command = "BrowseFolder()")
     
     cmds.separator(h = 10)
     cmds.text(label = "Folder Name", align = "center")
     objName = cmds.textField(changeCommand = "checkFolderExist()")
-    currentFileName = os.path.basename(cmds.file(query = True, sceneName = True))
+    currentFileName = os.path.basename(currentFilePath)
     if "_" in currentFileName:
         cmds.textField(objName, edit = True, text = re.search('(.+?)_', currentFileName).group(1))
         
