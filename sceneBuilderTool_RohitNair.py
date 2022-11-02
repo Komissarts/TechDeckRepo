@@ -6,8 +6,19 @@ import posixpath
 
 SceneDir = str(cmds.file(q=True, exn=True))
 
-def buildScene():
-    print('button pressed')
+
+def buildScene(): #Detects what scene the user is in
+    if(SceneDir.find("animation") != -1):
+        print('Animation')
+    elif(SceneDir.find("layout") != -1):
+        print('Layout')
+    elif(SceneDir.find("light") != -1):
+        print('Lighting')
+    else:
+        print('Scene Not Identified')
+
+def importSetAssets():
+
 
 
 #GUI
@@ -21,10 +32,7 @@ cmds.separator(h=10)
 cmds.textField(tx = SceneDir)
 cmds.separator(h=20)
 
-cmds.text('Build New Scene')
-department = cmds.radioButtonGrp(label='Select Department: ', labelArray3=['Layout', 'Animation', 'Lighting'], numberOfRadioButtons=3)
-cmds.button(label='Build Scene', command='buildScene()')
+cmds.button(label='Build Current Scene', command='buildScene()')
 cmds.separator(h=20)
-
 
 cmds.showWindow('Scene_Builder')
