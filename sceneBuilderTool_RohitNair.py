@@ -4,20 +4,32 @@ import re
 import ntpath
 import posixpath
 
+#Gets Relative File path 
 SceneDir = str(cmds.file(q=True, exn=True))
+AssetsDir = SceneDir[:SceneDir.rfind("sequence")] + "assets"
+SetDir = AssetsDir + "/set"
+CamDir = AssetsDir + "/camera"
+CharDir = AssetsDir + "/character"
+PropDir = AssetsDir + "/prop"
 
+#Check if Windows or Linux
+if(os.name == 'nt'):
+    isWindows = True
+else:
+    isWindows = False
 
 def buildScene(): #Detects what scene the user is in
     if(SceneDir.find("animation") != -1):
         print('Animation')
     elif(SceneDir.find("layout") != -1):
         print('Layout')
+        print(AssetsDir)
     elif(SceneDir.find("light") != -1):
         print('Lighting')
     else:
         print('Scene Not Identified')
 
-def importSetAssets():
+#def importSetAssets():
 
 
 
