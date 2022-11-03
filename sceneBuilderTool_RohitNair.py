@@ -92,7 +92,7 @@ def importCharAssets():
 
     for filename in os.listdir(CharDir):
         if "DS_Store" not in filename:
-            ModelDir = CharDir + filename + '/model/'
+            ModelDir = CharDir + filename + '/rig/'
             for model in os.listdir(ModelDir):
                 if "DS_Store" not in model and "cache" not in model and "source" not in model:
                     verNumber = model[-4:-3]
@@ -114,7 +114,7 @@ def importPropAssets():
 
     for filename in os.listdir(PropDir):
         if "DS_Store" not in filename:
-            ModelDir = PropDir + filename + '/model/source/'
+            ModelDir = PropDir + filename + '/rig/source/'
             for model in os.listdir(ModelDir):
                 if "DS_Store" not in model and "cache" not in model and "source" not in model:
                     verNumber = model[-4:-3]
