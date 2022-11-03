@@ -18,7 +18,7 @@ if(os.name == 'nt'):
 else:
     isWindows = False
 
-def buildScene(): #Detects what scene the user is in
+def buildScene(): #Detects what scene the user is in and imports relevant assets
     if(SceneDir.find("animation") != -1):
         print('Building Animation')
         importSetAssets()
@@ -49,6 +49,7 @@ def importSetAssets():
         if "DS_Store" not in filename:
             ModelDir = SetDir + filename + '/model/'
             for model in os.listdir(ModelDir):
+                # Version control to determine latest model version and import it
                 if "DS_Store" not in model and "cache" not in model and "source" not in model:
                     verNumber = model[-4:-3]
                     verNumberInt = int(verNumber)
